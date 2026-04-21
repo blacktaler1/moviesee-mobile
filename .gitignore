@@ -1,2 +1,21 @@
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
+
+# Android signing — HECH QACHON yuklamang!
+android/key.properties
+android/*.jks
+android/*.keystore
+android/moviesee-release.jks
+
+# Firebase — HECH QACHON yuklamang!
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Android signing — HECH QACHON yuklamang!
+android/key.properties
+android/*.jks
+android/*.keystore
+
+# Firebase config — HECH QACHON yuklamang!
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
