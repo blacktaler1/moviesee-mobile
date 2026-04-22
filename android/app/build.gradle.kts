@@ -40,7 +40,7 @@ android {
     defaultConfig {
         applicationId = "com.moviesee.app"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true

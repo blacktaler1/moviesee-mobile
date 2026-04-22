@@ -1,49 +1,123 @@
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../../core/logger/app_logger.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'storage_service.dart';
+import 'api_service.dart';
 
 @pragma('vm:entry-point')
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-  appLogger.info('[FCM] Background: ${message.messageId}');
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await NotificationService._showLocalNotification(message);
 }
 
 class NotificationService {
-  static final _fcm = FirebaseMessaging.instance;
-  static final _local = FlutterLocalNotificationsPlugin();
+  static final _messaging = FirebaseMessaging.instance;
+  static final _localNotif = FlutterLocalNotificationsPlugin();
+
+  static const _channel = AndroidNotificationChannel(
+    'moviesee_invites',
+    'Xona Takliflari',
+    description: 'Do\'stingiz sizni xonaga taklif qilganda bildirishnoma',
+    importance: Importance.high,
+    playSound: true,
+  );
+
+  static final navigatorKey = GlobalKey<NavigatorState>();
 
   static Future<void> initialize() async {
-    await _fcm.requestPermission();
-    FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    await _local.initialize(
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+    await _localNotif.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        iOS: DarwinInitializationSettings(),
-      ),
+          android: androidSettings, iOS: iosSettings),
+      onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
-    FirebaseMessaging.onMessage.listen(_onForeground);
-    appLogger.info('[FCM] NotificationService initialized');
+    await _localNotif
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
+
+    if (Platform.isIOS) {
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    }
+
+    if (Platform.isAndroid) {
+      await _localNotif
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+    }
+
+    final token = await _messaging.getToken();
+    if (token != null) await _saveFcmToken(token);
+    _messaging.onTokenRefresh.listen(_saveFcmToken);
+
+    FirebaseMessaging.onMessage.listen(_showLocalNotification);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+
+    final initial = await _messaging.getInitialMessage();
+    if (initial != null) _handleMessage(initial);
   }
 
-  static Future<String?> getToken() => _fcm.getToken();
+  static Future<void> _saveFcmToken(String token) async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken != null) await ApiService.saveFcmToken(token);
+    } catch (_) {}
+  }
 
-  static void _onForeground(RemoteMessage message) {
-    final n = message.notification;
-    if (n == null) return;
-    appLogger.info('[FCM] Foreground: ${n.title}');
-    _local.show(
-      id: n.hashCode,
-      title: n.title,
-      body: n.body,
-      notificationDetails: const NotificationDetails(
+  static Future<void> _showLocalNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+    await _localNotif.show(
+      id: notification.hashCode,
+      title: notification.title,
+      body: notification.body,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
-          'moviesee_channel',
-          'MovieSee',
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          icon: '@mipmap/ic_launcher',
           importance: Importance.high,
           priority: Priority.high,
         ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
+      payload: message.data['room_code'],
     );
+  }
+
+  static void _onNotificationTapped(NotificationResponse response) {
+    final roomCode = response.payload;
+    if (roomCode != null && roomCode.isNotEmpty) {
+      navigatorKey.currentContext?.go('/room/$roomCode');
+    }
+  }
+
+  static void _handleMessage(RemoteMessage message) {
+    final roomCode = message.data['room_code'];
+    if (roomCode != null) {
+      navigatorKey.currentContext?.go('/room/$roomCode');
+    }
   }
 }
