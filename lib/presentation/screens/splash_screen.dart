@@ -34,20 +34,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.movie_filter_rounded,
-                size: 80, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            Text('MovieSee',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge
-                    ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 8),
-            Text('Birgalikda tomosha qiling',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Colors.white54)),
+            Image.asset(
+              'assets/images/splash_logo.png',
+              width: 280,
+              height: 280,
+            ),
           ],
         ),
       ),
