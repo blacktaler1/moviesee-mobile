@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- ─── Advertising ID (Android 13+ / Firebase talab qiladi) ── -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
     <!-- ─── Mikrofon (ovozli aloqa — WebRTC) ────────────────── -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
