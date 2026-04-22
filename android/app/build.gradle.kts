@@ -14,9 +14,9 @@ if (keyPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.moviesee.app"
+    namespace = "uz.moviesee.app"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.moviesee.app"
+        applicationId = "uz.moviesee.app"
         minSdk = 23
         targetSdk = 36
         versionCode = flutter.versionCode
@@ -51,6 +51,12 @@ android {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }

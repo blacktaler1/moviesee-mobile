@@ -1,4 +1,4 @@
-package com.moviesee.app
+package uz.moviesee.app
 
 import io.flutter.embedding.android.FlutterActivity
 
