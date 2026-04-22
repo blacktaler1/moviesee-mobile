@@ -17,12 +17,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passCtrl = TextEditingController();
   bool _loading = false;
   String? _error;
+  String? _loadingHint;
 
   Future<void> _login() async {
     setState(() {
       _loading = true;
       _error = null;
+      _loadingHint = null;
     });
+
+    // Render free tier: 15+ soniya javob kelmasa "server uyg'onmoqda" xabari
+    final hintTimer = Future.delayed(const Duration(seconds: 8), () {
+      if (mounted && _loading) {
+        setState(() => _loadingHint = 'Server uyg\'onmoqda, biroz kuting...');
+      }
+    });
+
     try {
       final res = await ApiService.login(
         email: _emailCtrl.text.trim(),
@@ -35,8 +45,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       setState(() => _error = 'Email yoki parol noto\'g\'ri');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() { _loading = false; _loadingHint = null; });
     }
+    await hintTimer;
   }
 
   @override
@@ -87,8 +98,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!,
-                    style: const TextStyle(color: Colors.redAccent)),
+                Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+              ],
+              if (_loadingHint != null) ...[
+                const SizedBox(height: 12),
+                Text(_loadingHint!,
+                    style: const TextStyle(color: Colors.white54, fontSize: 13)),
               ],
               const SizedBox(height: 24),
               ElevatedButton(
