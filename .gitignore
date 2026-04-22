@@ -1,15 +1,13 @@
-/android/app/google-services.json
-/ios/Runner/GoogleService-Info.plist
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
 
-# Android signing — HECH QACHON yuklamang!
-android/key.properties
-android/*.jks
-android/*.keystore
-android/moviesee-release.jks
-
-# Firebase — HECH QACHON yuklamang!
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
+# Android local config — machine-specific, never commit
+android/local.properties
+android/.gradle/
 
 # Android signing — HECH QACHON yuklamang!
 android/key.properties
@@ -19,3 +17,9 @@ android/*.keystore
 # Firebase config — HECH QACHON yuklamang!
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
